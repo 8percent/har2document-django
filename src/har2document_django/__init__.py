@@ -15,7 +15,7 @@ def resolve_url(url: str) -> ResolverMatch:
     try:
         return resolve(urlparse(url).path)
     except Resolver404:
-        raise
+        raise DjangoViewDoesNotExist
 
 
 def _is_view_class(match: ResolverMatch) -> bool:
@@ -39,12 +39,7 @@ def _get_view_function_name_from_match(match: ResolverMatch) -> str:
 
 
 def get_django_view_name_from_path(url: str, include_module: bool = False) -> str:
-    path: str = urlparse(url).path
-
-    try:
-        match: ResolverMatch = resolve(path)
-    except Resolver404:
-        raise DjangoViewDoesNotExist
+    match: ResolverMatch = resolve_url(url)
 
     func_mapper: dict[tuple[bool, bool], Callable[[ResolverMatch], str]] = {
         (True, True): _get_view_class_path_from_path,
@@ -60,24 +55,14 @@ def _get_path_parameter_from_match(match: ResolverMatch) -> dict[str, str]:
 
 
 def get_path_parameter_from_url(url: str) -> dict[str, Any]:
-    path: str = urlparse(url).path
-
-    try:
-        match: ResolverMatch = resolve(path)
-    except Resolver404:
-        raise DjangoViewDoesNotExist
+    match: ResolverMatch = resolve_url(url)
 
     return _get_path_parameter_from_match(match)
 
 
 def replace_request_path_with_variable(url: str) -> str:
-    path: str = urlparse(url).path
+    match: ResolverMatch = resolve_url(url)
     query_string: str = urlparse(url).query
-
-    try:
-        match: ResolverMatch = resolve(path)
-    except Resolver404:
-        raise DjangoViewDoesNotExist
 
     return f"/{match.route}?{query_string}"
 
