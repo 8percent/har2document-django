@@ -45,7 +45,7 @@ def resolve_url(url: str) -> ResolverMatch:
 
 
 def _is_view_class(match: ResolverMatch) -> bool:
-    return hasattr(match.func, "cls")
+    return hasattr(match.func, "view_class") or hasattr(match.func, "cls")
 
 
 def _get_view_name(match: ResolverMatch) -> str:
