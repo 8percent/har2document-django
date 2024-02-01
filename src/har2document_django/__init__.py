@@ -150,6 +150,7 @@ DEFAULT_MASKING_MAPPING: dict[str, str] = {}
 
 DEFAULT_MARKDOWN_COMPONENT_CLASSES: list[type[MarkdownComponent]] = [
     DjangoEndpoint,
+    PathParameter,
     QueryParameter,
     RequestHeader,
     RequestBody,
