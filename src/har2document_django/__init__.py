@@ -1,3 +1,4 @@
+import re
 from collections.abc import Callable
 from typing import Any
 from urllib.parse import urlparse
@@ -10,9 +11,9 @@ class DjangoViewDoesNotExist(Exception):
     pass
 
 
-def resolve_path(url_path: str) -> ResolverMatch:
+def resolve_url(url: str) -> ResolverMatch:
     try:
-        return resolve(url_path)
+        return resolve(urlparse(url).path)
     except Resolver404:
         raise
 
@@ -30,14 +31,16 @@ def _get_view_class_name_from_match(match: ResolverMatch) -> str:
 
 
 def _get_view_function_path_from_match(match: ResolverMatch) -> str:
-    return match._func_path
+    return f"{match._func_path}()"
 
 
 def _get_view_function_name_from_match(match: ResolverMatch) -> str:
-    return match.func.__name__
+    return f"{match.func.__name__}()"
 
 
-def get_django_view_name_from_path(path: str, include_module: bool = False) -> str:
+def get_django_view_name_from_path(url: str, include_module: bool = False) -> str:
+    path: str = urlparse(url).path
+
     try:
         match: ResolverMatch = resolve(path)
     except Resolver404:
@@ -67,6 +70,27 @@ def get_path_parameter_from_url(url: str) -> dict[str, Any]:
     return _get_path_parameter_from_match(match)
 
 
+def replace_request_path_with_variable(url: str) -> str:
+    path: str = urlparse(url).path
+    query_string: str = urlparse(url).query
+
+    try:
+        match: ResolverMatch = resolve(path)
+    except Resolver404:
+        raise DjangoViewDoesNotExist
+
+    return f"/{match.route}?{query_string}"
+
+
+def replace_route(route: str) -> str:
+    """
+    Example:
+        - "/api/loans/<str:aidb64>/<str:token>/" -> "/api/loans/{aidb64}/{token}/"
+        - "/api/users/<int:pk>" -> "/api/users/{pk}"
+    """
+    return re.sub(r"<\w+:(\w+)>", r"{\1}", route)
+
+
 class DjangoEndpoint(MarkdownComponent):
     def render(self) -> str:
         """
@@ -76,15 +100,18 @@ class DjangoEndpoint(MarkdownComponent):
         Example:
             ### views.list_users() POST `/api/users/?type=personal`
         """
+        request_path_replaced: str = replace_route(
+            replace_request_path_with_variable(self.document["request_url"])
+        )
         if self.document["request_method"] == HTTPMethod.GET:
             for key, value in self.document["request_query_string"].items():
-                self.document["request_path"] = self.document["request_path"].replace(
+                request_path_replaced = request_path_replaced.replace(
                     f"{key}={value}", f"{key}={{{key}}}"
                 )
 
         return (
-            f"### {get_django_view_name_from_path(self.document['request_path'])}"
-            f" {self.document['request_method']} `{self.document['request_path']}`"
+            f"### {get_django_view_name_from_path(self.document['request_url'])}"
+            f" {self.document['request_method']} `{request_path_replaced}`"
         )
 
 
