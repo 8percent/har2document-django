@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 from django.urls import Resolver404, ResolverMatch, resolve
 from har2document import (
     Document,
-    HTTPMethod,
     MarkdownComponent,
     QueryParameter,
     RequestBody,
@@ -116,11 +115,10 @@ class DjangoEndpoint(MarkdownComponent):
         request_path_replaced: str = replace_route(
             replace_request_path_with_variable(self.document["request_url"])
         )
-        if self.document["request_method"] == HTTPMethod.GET:
-            for key, value in self.document["request_query_string"].items():
-                request_path_replaced = request_path_replaced.replace(
-                    f"{key}={value}", f"{key}={{{key}}}"
-                )
+        for key, value in self.document["request_query_string"].items():
+            request_path_replaced = request_path_replaced.replace(
+                f"{key}={value}", f"{key}={{{key}}}"
+            )
 
         return (
             f"### {get_django_view_name_from_path(self.document['request_url'])}"
