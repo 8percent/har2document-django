@@ -1,10 +1,38 @@
 import re
 from collections.abc import Callable
-from typing import Any
+from pathlib import Path
+from typing import Any, cast, get_type_hints
 from urllib.parse import urlparse
 
 from django.urls import Resolver404, ResolverMatch, resolve
-from har2document import HTTPMethod, MarkdownComponent
+from har2document import (
+    Document,
+    HTTPMethod,
+    MarkdownComponent,
+    QueryParameter,
+    RequestBody,
+    RequestHeader,
+    ResponseBody,
+    convert_har_file_to_documents,
+    export_dicts_to_csv,
+    export_markdown_to_file,
+    render_documents_to_markdown,
+)
+
+__all__ = [
+    "DjangoViewDoesNotExist",
+    "resovle_url",
+    "get_django_view_name_from_path",
+    "get_path_parameter_from_url",
+    "replace_request_path_with_variable",
+    "replace_route",
+    "DjangoEndpoint",
+    "PathParameter",
+    "DEFAULT_MASKING_MAPPING",
+    "DEFAULT_MARKDOWN_COMPONENT_CLASSES",
+]
+
+# TODO: Define DjangoDocument inherit from Document
 
 
 class DjangoViewDoesNotExist(Exception):
@@ -118,3 +146,45 @@ class PathParameter(MarkdownComponent):
     @property
     def condition(self) -> bool:
         return bool(get_path_parameter_from_url(self.document["request_url"]))
+
+
+DEFAULT_MASKING_MAPPING: dict[str, str] = {}
+
+DEFAULT_MARKDOWN_COMPONENT_CLASSES: list[type[MarkdownComponent]] = [
+    DjangoEndpoint,
+    QueryParameter,
+    RequestHeader,
+    RequestBody,
+    ResponseBody,
+]
+
+
+def run(
+    har_file_path: str,
+    masking_mapping: dict[str, str] | None = None,
+    csv: bool = False,
+    markdown: bool = False,
+    markdown_component_classes: list[type[MarkdownComponent]] | None = None,
+) -> list[Document]:
+    _har_file_path: Path = Path(har_file_path)
+    _masking_mapping: dict[str, str] = masking_mapping or DEFAULT_MASKING_MAPPING
+    _markdown_component_classes: list[type[MarkdownComponent]] = (
+        markdown_component_classes or DEFAULT_MARKDOWN_COMPONENT_CLASSES
+    )
+
+    documents: list[Document] = convert_har_file_to_documents(
+        _har_file_path,
+        _masking_mapping,
+    )
+    if csv:
+        export_dicts_to_csv(
+            cast(list[dict[str, Any]], documents),
+            _har_file_path.with_suffix(".csv"),
+            fieldnames=list(get_type_hints(Document).keys()),
+        )
+    if markdown:
+        export_markdown_to_file(
+            render_documents_to_markdown(documents, _markdown_component_classes),
+            _har_file_path.with_suffix(".md"),
+        )
+    return documents
