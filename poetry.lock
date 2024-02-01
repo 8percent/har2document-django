@@ -278,7 +278,7 @@ pyflakes = ">=3.1.0,<3.2.0"
 
 [[package]]
 name = "har2document"
-version = "0.1.0"
+version = "0.1.1"
 description = "Generate API document from HAR file"
 optional = false
 python-versions = ">=3.10 <3.12"
@@ -291,8 +291,8 @@ haralyzer = "^2.4.0"
 [package.source]
 type = "git"
 url = "https://github.com/jseop-lim/har2document.git"
-reference = "v0.1.0"
-resolved_reference = "10be430350dd95aeec999981a936ff3be75cbf91"
+reference = "v0.1.1"
+resolved_reference = "069c72332815abb3888d839827568b5f249e54c6"
 
 [[package]]
 name = "haralyzer"
@@ -734,4 +734,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10 <3.12"
-content-hash = "9d6fcd7d3344f6efd478e28d873a08a81c74494a9f8e806acee9a3fd00938f8a"
+content-hash = "d734bb06f2674ca7bf8f9c1ebe5cb2c18c8c7930c4b6b3a1fffd023dbd8a9520"
