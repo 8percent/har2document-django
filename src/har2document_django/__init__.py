@@ -1,4 +1,6 @@
 from collections.abc import Callable
+from typing import Any
+from urllib.parse import urlparse
 
 from django.urls import Resolver404, ResolverMatch, resolve
 from har2document import HTTPMethod, MarkdownComponent
@@ -50,6 +52,21 @@ def get_view_from_path(path: str, include_module: bool = False) -> str:
     return func_mapper[_is_view_class(match), include_module](match)
 
 
+def _get_path_parameter_from_match(match: ResolverMatch) -> dict[str, str]:
+    return match.kwargs
+
+
+def get_path_parameter_from_url(url: str) -> dict[str, Any]:
+    path: str = urlparse(url).path
+
+    try:
+        match: ResolverMatch = resolve(path)
+    except Resolver404:
+        raise DjangoViewDoesNotExist
+
+    return _get_path_parameter_from_match(match)
+
+
 class DjangoEndpoint(MarkdownComponent):
     def render(self) -> str:
         """
@@ -69,3 +86,23 @@ class DjangoEndpoint(MarkdownComponent):
             f"### {get_view_from_path(self.document['request_path'])}"
             f" {self.document['request_method']} `{self.document['request_path']}`"
         )
+
+
+class PathParameter(MarkdownComponent):
+    def render(self) -> str:
+        """
+        Example:
+            Path Parameter
+
+            - `user_id`: `1`
+        """
+        return "Path Parameter\n\n" + "\n".join(
+            f"- `{key}`: `{value}`"
+            for key, value in get_path_parameter_from_url(
+                self.document["request_url"]
+            ).items()
+        )
+
+    @property
+    def condition(self) -> bool:
+        return bool(get_path_parameter_from_url(self.document["request_url"]))
