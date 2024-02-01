@@ -1,20 +1,20 @@
 [tool.poetry]
-name = "python-library"
-version = "1.1.0"
-description = "Provide base template for python library"
-authors = ["JaeyoungHeo <jay.jaeyoung@gmail.com>"]
-maintainers = ["JaeyoungHeo <jay.jaeyoung@gmail.com>"]
+name = "har2document-django"
+version = "0.1.0"
+description = "Generate API document from HAR file with Django"
+authors = ["Jeongseop Lim <jseoplim@gmail.com>"]
+maintainers = ["Jeongseop Lim <jseoplim@gmail.com>"]
 readme = "README.md"
-repository = "https://github.com/8percent/python-library"
+repository = "https://github.com/jseoplim/har2document-django"
 license = "MIT"
 packages = [
-    { include = "python_library", from = "src" },
+    { include = "har2document_django", from = "src" },
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.10 <3.12"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
 isort = "^5.13.2"
 tox = "^4.11.4"
@@ -35,7 +35,7 @@ line_length = 88
 [tool.black]
 preview = true
 line-length = 88
-target-version = ['py39', 'py310', 'py311']
+target-version = ['py310', 'py311']
 
 [tool.pytest.ini_options]
 addopts = "-p no:cacheprovider"
