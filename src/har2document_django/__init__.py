@@ -1,5 +1,4 @@
 import re
-from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast, get_type_hints
 from urllib.parse import urlparse
@@ -49,32 +48,20 @@ def _is_view_class(match: ResolverMatch) -> bool:
     return hasattr(match.func, "cls")
 
 
-def _get_view_class_path_from_path(match: ResolverMatch) -> str:
+def _get_view_name(match: ResolverMatch) -> str:
+    return match._func_path.split(".")[-1]
+
+
+def _get_view_path(match: ResolverMatch) -> str:
     return match._func_path
 
 
-def _get_view_class_name_from_match(match: ResolverMatch) -> str:
-    return match.func.cls.__name__
-
-
-def _get_view_function_path_from_match(match: ResolverMatch) -> str:
-    return f"{match._func_path}()"
-
-
-def _get_view_function_name_from_match(match: ResolverMatch) -> str:
-    return f"{match.func.__name__}()"
-
-
-def get_django_view_name_from_path(url: str, include_module: bool = False) -> str:
+def get_django_view_name_from_path(url: str) -> str:
     match: ResolverMatch = resolve_url(url)
 
-    func_mapper: dict[tuple[bool, bool], Callable[[ResolverMatch], str]] = {
-        (True, True): _get_view_class_path_from_path,
-        (True, False): _get_view_class_name_from_match,
-        (False, True): _get_view_function_path_from_match,
-        (False, False): _get_view_function_name_from_match,
-    }
-    return func_mapper[_is_view_class(match), include_module](match)
+    return (
+        _get_view_name(match) if _is_view_class(match) else f"{_get_view_path(match)}()"
+    )
 
 
 def _get_path_parameter_from_match(match: ResolverMatch) -> dict[str, str]:
