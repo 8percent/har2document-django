@@ -37,7 +37,7 @@ def _get_view_function_name_from_match(match: ResolverMatch) -> str:
     return match.func.__name__
 
 
-def get_view_from_path(path: str, include_module: bool = False) -> str:
+def get_django_view_name_from_path(path: str, include_module: bool = False) -> str:
     try:
         match: ResolverMatch = resolve(path)
     except Resolver404:
@@ -83,7 +83,7 @@ class DjangoEndpoint(MarkdownComponent):
                 )
 
         return (
-            f"### {get_view_from_path(self.document['request_path'])}"
+            f"### {get_django_view_name_from_path(self.document['request_path'])}"
             f" {self.document['request_method']} `{self.document['request_path']}`"
         )
 
