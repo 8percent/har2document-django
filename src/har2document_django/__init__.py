@@ -91,7 +91,7 @@ def replace_request_path_with_variable(url: str) -> str:
     match: ResolverMatch = resolve_url(url)
     query_string: str = urlparse(url).query
 
-    return f"/{match.route}?{query_string}"
+    return f"/{match.route}" + (f"?{query_string}" if query_string else "")
 
 
 def replace_route(route: str) -> str:
