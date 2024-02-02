@@ -290,7 +290,7 @@ haralyzer = "^2.4.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/jseop-lim/har2document.git"
+url = "https://github.com/8percent/har2document.git"
 reference = "v0.1.2"
 resolved_reference = "c2fe2949987293242e2f4d6c0ec6ee106f5533e6"
 
@@ -734,4 +734,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10 <3.12"
-content-hash = "f6b79d560b1b08642621e268fccf867209c1c612a8335768a07b4f94b79e96bc"
+content-hash = "d2b989e4dfb7c9a0fddcaea80bb0a4c8f6651fd59c149c082420d5fffdaa04e1"
